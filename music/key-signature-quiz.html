@@ -1,23 +1,590 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Key Signature Quiz</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            text-align: center;
-            padding: 50px;
-        }
-        h1 {
-            color: #24292e;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Key Signature Quiz</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card2: #273449;
+    --accent: #38bdf8;
+    --good: #22c55e;
+    --bad: #ef4444;
+    --warn: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --line: #334155;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 12px;
+  }
+  .wrap { width: 100%; max-width: 760px; }
+  h1 { margin: 0 0 6px; font-size: 1.7rem; }
+  .sub { color: var(--muted); margin: 0 0 18px; font-size: .95rem; line-height: 1.5; }
+  .card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  .hidden { display: none !important; }
+  button {
+    font: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    background: var(--accent);
+    color: #0f172a;
+    font-weight: 700;
+  }
+  button:active { transform: translateY(1px); }
+
+  .topbar { display:flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .qnum { font-weight: 700; font-size: 1.02rem; }
+  .qnum span { color: var(--muted); font-weight: 500; }
+  .timer { display:flex; align-items:center; gap:8px; }
+  .timer .sec { font-variant-numeric: tabular-nums; font-weight: 800; min-width: 2.6ch; text-align:right; font-size: 1.05rem; }
+  .track { width: 150px; height: 10px; background: var(--line); border-radius: 6px; overflow: hidden; }
+  .bar { height: 100%; width: 100%; background: var(--good); transition: width .1s linear, background .3s; }
+  .progress { height: 4px; background: var(--line); border-radius: 4px; overflow: hidden; margin: 10px 0 16px; }
+  .progress > div { height: 100%; background: var(--accent); width: 0; transition: width .25s ease; }
+
+  .prompt { font-size: 1.3rem; line-height: 1.55; margin: 6px 0 18px; }
+  .given { color: var(--accent); font-weight: 700; }
+  .blank-mark { color: var(--accent); letter-spacing: 3px; }
+  .choices { display:flex; flex-direction:column; gap:10px; margin: 6px 0 14px; }
+  .choices .row { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  .row-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; text-align:center; margin: 2px 0 -4px; }
+  .choice {
+    font: inherit; font-size: 1rem; font-weight: 600;
+    padding: 11px 13px; min-width: 44px; text-align:center;
+    border-radius: 10px; border: 1px solid var(--line);
+    background: #0f172a; color: var(--text);
+    cursor: pointer; user-select: none;
+    transition: background .12s, border-color .12s, color .12s, transform .05s;
+  }
+  .choice:active { transform: translateY(1px); }
+  .choice.sel { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+  .choice.none-btn { min-width: auto; padding: 11px 22px; }
+  .submit-row { display:flex; justify-content:center; margin: 2px 0 4px; }
+  .type-list { display:flex; flex-direction:column; gap:8px; margin: 6px 0 10px; }
+  .type-opt { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#0f172a; cursor:pointer; }
+  .type-opt input { margin-top:3px; width:18px; height:18px; cursor:pointer; accent-color: var(--accent); flex:none; }
+  .type-opt span { line-height:1.35; }
+  .type-opt small { color: var(--muted); }
+  .type-opt:has(input:checked) { border-color: var(--accent); background:#16243a; }
+  .hint { color: var(--muted); font-size: .82rem; margin-top: 10px; line-height: 1.45; }
+  code { background: #0f172a; padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+  .section-title { font-weight: 700; color: var(--text); margin: 18px 0 6px; font-size: 1.02rem; }
+  .rules { color: var(--muted); line-height: 1.7; padding-left: 20px; margin: 6px 0; }
+  .rules b { color: var(--text); }
+  .note-box { background: #0f172a; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-top: 8px; }
+  .ex { display: inline-block; background: #273449; border: 1px solid var(--line); border-radius: 6px; padding: 3px 9px; margin: 3px 5px 3px 0; font-size: .92rem; }
+  .ex b { color: var(--accent); }
+
+  .result-banner { text-align:center; margin-bottom: 8px; }
+  .score { font-size: 2.2rem; font-weight: 800; letter-spacing: .5px; }
+  .score .good { color: var(--good); }
+  .score .slash { color: var(--muted); }
+  .result-sub { color: var(--muted); margin-top: 6px; font-size: .95rem; }
+  .result-sub b { color: var(--text); }
+
+  .scroll { overflow-x: auto; margin-top: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; min-width: 560px; }
+  th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; }
+  td.num { color: var(--muted); width: 34px; white-space: nowrap; }
+  td.status { font-weight: 800; width: 44px; text-align: center; }
+  td.status.v { color: var(--good); }
+  td.status.x { color: var(--bad); }
+  .your.miss { color: var(--muted); font-style: italic; }
+  .correct { color: var(--good); white-space: nowrap; }
+  .qtext { color: var(--text); }
+  .actions { margin-top: 20px; text-align:center; }
+  ul { margin: 8px 0 14px; }
+  li { margin: 4px 0; }
+
+  /* time slider */
+  .time-row { display:flex; align-items:center; gap:14px; margin: 6px 0 14px; }
+  .time-row input[type=range] { flex:1; accent-color: var(--accent); cursor:pointer; height: 28px; }
+  .time-val { font-size: 1rem; min-width: 120px; white-space: nowrap; }
+  .time-val b { font-size: 1.4rem; color: var(--accent); }
+
+  /* small screens (phones) */
+  @media (max-width: 600px) {
+    body { padding: 10px 8px; }
+    .card { padding: 16px 14px; }
+    h1 { font-size: 1.4rem; }
+    .sub { font-size: .85rem; margin-bottom: 12px; }
+    .prompt { font-size: 1.08rem; margin: 6px 0 14px; }
+    .choices .row { gap: 6px; }
+    .choice { padding: 12px 10px; min-width: 40px; font-size: .95rem; }
+    .track { width: 96px; }
+    .timer .sec { font-size: .95rem; }
+    .qnum { font-size: .95rem; }
+    .score { font-size: 1.8rem; }
+    .section-title { margin-top: 14px; }
+    .time-val b { font-size: 1.2rem; }
+  }
+</style>
 </head>
 <body>
-    <h1>hi</h1>
+<div class="wrap">
+  <h1>🎼 Key Signature Quiz</h1>
+  <p class="sub">20 random questions · 10-40s per question · major &amp; minor, sharps &amp; flats.</p>
+
+  <!-- Start screen -->
+  <div id="startScreen" class="card">
+    <p class="prompt" style="margin-top:0">🎼 Ready? Here's how it works.</p>
+
+    <div class="section-title">Quiz rules</div>
+    <ul class="rules">
+      <li><b>20 questions</b> per round, drawn from the question types you pick below.</li>
+      <li><b>Pick the time</b> per question (10-40s) — the bar shows time left (green → yellow → red).</li>
+      <li>Tap your answer, then press <b>Next</b> (key-name) or <b>Submit</b> (key-signature). Picked but didn't press? Your selection is still saved when time runs out.</li>
+      <li><b>No selection in time?</b> It counts as missing and moves on by itself.</li>
+      <li>You can't go back. At the end you'll get a score and a full question-by-question review.</li>
+    </ul>
+
+    <div class="section-title">Three question styles</div>
+    <ul class="rules">
+      <li><b>Signature → key:</b> "If a key has 3 sharps (F♯ C♯ G♯), the major key is ____" &rarr; e.g. answer: <b>A</b></li>
+      <li><b>Key → signature:</b> "If it is A major, its key signature is ____" &rarr; e.g. answer: tap <b>F♯ C♯ G♯</b></li>
+      <li><b>Relative keys:</b> "What is the relative minor of C major?" &rarr; e.g. answer: <b>a</b></li>
+      <li>Both <b>major</b> and <b>minor</b> keys can show up in any style.</li>
+    </ul>
+
+    <div class="section-title">How to answer</div>
+    <div class="note-box">
+      <p style="margin:0 0 6px"><b>Key-name questions</b> (find the key, or find the relative key): tap the one key name you think is right - it turns blue - then press <b>Next</b> (or Enter).</p>
+      <p style="margin:12px 0 6px"><b>Key-signature questions</b> (find the sharps/flats): tap <i>every</i> sharp or flat that belongs to the key - they turn blue - then press <b>Submit</b> (or Enter). Pick the right set; the order you tap them in doesn't matter.</p>
+      <p style="margin:12px 0 6px"><b>Short on time?</b> If you've picked an answer but don't press Next/Submit before the clock runs out, your selection is still recorded. Only a fully blank answer counts as missing.</p>
+      <p class="hint" style="margin:0">
+        Names use <code>♯</code> for sharp and <code>♭</code> for flat (e.g. <code>F♯</code>, <code>B♭</code>). The choices are listed in alphabetical order within each row. Tap <b>None</b> for keys with no accidentals (C major / a minor).
+      </p>
+    </div>
+    <div class="section-title">Time per question</div>
+    <div class="time-row">
+      <input type="range" id="timeSlider" min="10" max="40" step="5" value="30">
+      <span class="time-val"><b id="timeVal">30</b> seconds</span>
+    </div>
+
+    <div class="section-title">Choose question types</div>
+    <div class="type-list">
+      <label class="type-opt"><input type="checkbox" id="type1" checked><span><b>Signature -> key</b><br><small>Given the sharps/flats, find the major or minor key</small></span></label>
+      <label class="type-opt"><input type="checkbox" id="type2" checked><span><b>Key -> signature</b><br><small>Given the key, find its sharps/flats</small></span></label>
+      <label class="type-opt"><input type="checkbox" id="type3" checked><span><b>Relative keys</b><br><small>Find the relative major or minor</small></span></label>
+    </div>
+    <p class="hint" style="margin:0 0 14px">You can tick more than one - pick any one, two, or all three. Each round draws 20 questions from your selection.</p>
+    <div class="actions" style="text-align:left"><button id="startBtn">Start Quiz</button></div>
+  </div>
+
+  <!-- Quiz screen -->
+  <div id="quizScreen" class="card hidden">
+    <div class="topbar">
+      <div class="qnum">Question <b id="qIdx">1</b><span> / 20</span></div>
+      <div class="timer">
+        <div class="track"><div class="bar" id="bar"></div></div>
+        <div class="sec" id="sec">30</div>
+      </div>
+    </div>
+    <div class="progress"><div id="overallBar"></div></div>
+    <div class="prompt" id="prompt"></div>
+    <div class="choices" id="choices"></div>
+    <div class="submit-row hidden" id="submitRow"><button id="submitBtn">Submit</button></div>
+    <p class="hint" id="liveHint"></p>
+  </div>
+
+  <!-- Result screen -->
+  <div id="resultScreen" class="card hidden">
+    <div class="result-banner">
+      <div class="score"><span class="good" id="correctCount">0</span><span class="slash"> / </span><span id="totalCount">20</span></div>
+      <div class="result-sub">Correct: <b id="cc">0</b> &nbsp;·&nbsp; Wrong (incl. missing): <b id="wc">0</b></div>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Question</th><th>Your answer</th><th>Correct answer</th><th>V/X</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="actions"><button id="restartBtn">New Quiz</button></div>
+  </div>
+</div>
+
+<script>
+  // ---------- data: 15 key signatures (0 .. 7 sharps, 1 .. 7 flats) ----------
+  const SIGNATURES = [
+    { count: 0, type: 'none', major: 'C',  minor: 'a'  },
+    { count: 1, type: 'sharp', major: 'G',  minor: 'e'  },
+    { count: 2, type: 'sharp', major: 'D',  minor: 'b'  },
+    { count: 3, type: 'sharp', major: 'A',  minor: 'f#' },
+    { count: 4, type: 'sharp', major: 'E',  minor: 'c#' },
+    { count: 5, type: 'sharp', major: 'B',  minor: 'g#' },
+    { count: 6, type: 'sharp', major: 'F#', minor: 'd#' },
+    { count: 7, type: 'sharp', major: 'C#', minor: 'a#' },
+    { count: 1, type: 'flat',  major: 'F',  minor: 'd'  },
+    { count: 2, type: 'flat',  major: 'Bb', minor: 'g'  },
+    { count: 3, type: 'flat',  major: 'Eb', minor: 'c'  },
+    { count: 4, type: 'flat',  major: 'Ab', minor: 'f'  },
+    { count: 5, type: 'flat',  major: 'Db', minor: 'bb' },
+    { count: 6, type: 'flat',  major: 'Gb', minor: 'eb' },
+    { count: 7, type: 'flat',  major: 'Cb', minor: 'ab' },
+  ];
+
+  // ---------- helpers ----------
+  const SHARPS_ORDER = ['F','C','G','D','A','E','B'];   // order sharps are added
+  const FLATS_ORDER  = ['B','E','A','D','G','C','F'];   // order flats are added
+  // canonical single-string form of a tonic, e.g. 'bb' -> 'Bb', 'f#' -> 'F#'
+  function canonicalNote(n) { return n[0].toUpperCase() + n.slice(1); }
+  // pretty form for display: 'F#' -> 'F♯', 'Bb' -> 'B♭', 'bb' -> 'b♭', 'b' stays 'b'
+  function disp(n) { return n[0] + n.slice(1).replace(/#/g, '♯').replace(/b/g, '♭'); }
+  // the set of accidentals (canonical strings) for a key signature
+  function expectedAccidentals(count, type) {
+    if (count === 0) return [];
+    const order = type === 'sharp' ? SHARPS_ORDER : FLATS_ORDER;
+    const sym = type === 'sharp' ? '#' : 'b';
+    return order.slice(0, count).map(n => n + sym);
+  }
+  function accDisplay(count, type) {
+    if (count === 0) return 'none (no sharps/flats)';
+    return expectedAccidentals(count, type).map(disp).join(', ');
+  }
+  function sigPhrase(count, type) {
+    if (count === 0) return 'no sharps or flats';
+    const noun = type === 'sharp' ? 'sharp' : 'flat';
+    const base = count + ' ' + noun + (count > 1 ? 's' : '');
+    const acc = expectedAccidentals(count, type).map(disp).join(' ');
+    return base + ' (' + acc + ')';
+  }
+  // choice grids - shown in alphabetical order (A -> G) within each row
+  const NOTE_ROWS = [           // key-name questions: flats / naturals / sharps
+    ['Ab','Bb','Cb','Db','Eb','Fb','Gb'],
+    ['A','B','C','D','E','F','G'],
+    ['A#','B#','C#','D#','E#','F#','G#'],
+  ];
+  const SIG_ROWS = [            // signature questions: sharps row / flats row
+    ['A#','B#','C#','D#','E#','F#','G#'],
+    ['Ab','Bb','Cb','Db','Eb','Fb','Gb'],
+  ];
+  const ACC_ORDER = ['F#','C#','G#','D#','A#','E#','B#','Bb','Eb','Ab','Db','Gb','Cb','Fb'];
+
+  // ---------- build the full question pool (90 questions) ----------
+  const HINT_NOTE = 'Tap the one key name that fits.';
+  const HINT_SIG  = 'Tap every sharp/flat that applies, then Submit. Tap "None" for no accidentals.';
+  function buildPool() {
+    const pool = [];
+    for (const sig of SIGNATURES) {
+      const phrase = sigPhrase(sig.count, sig.type);
+      const sigExp  = expectedAccidentals(sig.count, sig.type);
+      const sigDisp = accDisplay(sig.count, sig.type);
+      const majN = canonicalNote(sig.major);
+      const minN = canonicalNote(sig.minor);
+      const majD = disp(sig.major);
+      const minD = disp(sig.minor);
+
+      // Style 1: signature -> major key
+      pool.push({
+        kind: 'note', multi: false, style: 1,
+        promptHTML: `If a key has <span class="given">${phrase}</span>, the <b>major key</b> is <span class="blank-mark">______</span>`,
+        promptText:  `If a key has ${phrase}, what is the major key?`,
+        expected: majN, correctDisplay: majD + ' major', hint: HINT_NOTE,
+      });
+      // Style 1: signature -> minor key
+      pool.push({
+        kind: 'note', multi: false, style: 1,
+        promptHTML: `If a key has <span class="given">${phrase}</span>, the <b>minor key</b> is <span class="blank-mark">______</span>`,
+        promptText:  `If a key has ${phrase}, what is the minor key?`,
+        expected: minN, correctDisplay: minD + ' minor', hint: HINT_NOTE,
+      });
+      // Style 2: major key -> signature
+      pool.push({
+        kind: 'sig', multi: true, style: 2,
+        promptHTML: `If it is <span class="given">${majD} major</span>, its <b>key signature</b> is <span class="blank-mark">______</span>`,
+        promptText:  `If it is ${majD} major, what sharps/flats does it have?`,
+        expected: sigExp, correctDisplay: sigDisp, hint: HINT_SIG,
+      });
+      // Style 2: minor key -> signature
+      pool.push({
+        kind: 'sig', multi: true, style: 2,
+        promptHTML: `If it is <span class="given">${minD} minor</span>, its <b>key signature</b> is <span class="blank-mark">______</span>`,
+        promptText:  `If it is ${minD} minor, what sharps/flats does it have?`,
+        expected: sigExp, correctDisplay: sigDisp, hint: HINT_SIG,
+      });
+      // Style 3: relative minor of a major key
+      pool.push({
+        kind: 'note', multi: false, style: 3,
+        promptHTML: `The <b>relative minor</b> of <span class="given">${majD} major</span> is <span class="blank-mark">______</span>`,
+        promptText:  `What is the relative minor of ${majD} major?`,
+        expected: minN, correctDisplay: minD + ' minor', hint: HINT_NOTE,
+      });
+      // Style 3: relative major of a minor key
+      pool.push({
+        kind: 'note', multi: false, style: 3,
+        promptHTML: `The <b>relative major</b> of <span class="given">${minD} minor</span> is <span class="blank-mark">______</span>`,
+        promptText:  `What is the relative major of ${minD} minor?`,
+        expected: majN, correctDisplay: majD + ' major', hint: HINT_NOTE,
+      });
+    }
+    return pool;
+  }
+  const POOL = buildPool();
+
+  // ---------- quiz state ----------
+  const quiz = { questions: [], current: 0, answers: [], timer: null, selection: new Set(), busy: false };
+  let timeLimitSec = 30;   // seconds per question (set from the slider in startQuiz)
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // ---------- screen switching ----------
+  function show(which) {
+    document.getElementById('startScreen').classList.toggle('hidden', which !== 'start');
+    document.getElementById('quizScreen').classList.toggle('hidden', which !== 'quiz');
+    document.getElementById('resultScreen').classList.toggle('hidden', which !== 'result');
+  }
+
+  // ---------- flow ----------
+  function startQuiz() {
+    const styles = selectedStyles();
+    if (styles.length === 0) return;                 // nothing chosen (Start is disabled anyway)
+    timeLimitSec = parseInt(document.getElementById('timeSlider').value, 10) || 30;
+    const pool = POOL.filter(q => styles.includes(q.style));
+    quiz.questions = shuffle(pool).slice(0, 20);
+    quiz.current = 0;
+    quiz.answers = [];
+    show('quiz');
+    renderQuestion();
+  }
+  function backToStart() { stopTimer(); show('start'); }
+  function selectedStyles() {
+    const s = [];
+    if (document.getElementById('type1').checked) s.push(1);
+    if (document.getElementById('type2').checked) s.push(2);
+    if (document.getElementById('type3').checked) s.push(3);
+    return s;
+  }
+  function updateStartEnabled() {
+    document.getElementById('startBtn').disabled = selectedStyles().length === 0;
+  }
+
+  function renderQuestion() {
+    const q = quiz.questions[quiz.current];
+    quiz.busy = false;
+    quiz.selection = new Set();
+    document.getElementById('qIdx').textContent = (quiz.current + 1);
+    document.getElementById('prompt').innerHTML = q.promptHTML;
+    document.getElementById('liveHint').textContent = q.hint;
+    document.getElementById('overallBar').style.width =
+      ((quiz.current) / quiz.questions.length * 100) + '%';
+    buildChoices(q);
+    updateTimer(timeLimitSec);
+    startTimer();
+  }
+
+  function buildChoices(q) {
+    const box = document.getElementById('choices');
+    box.innerHTML = '';
+    if (q.kind === 'note') {
+      const labels = ['flats', 'naturals', 'sharps'];
+      NOTE_ROWS.forEach((row, i) => {
+        const lab = document.createElement('div'); lab.className = 'row-label'; lab.textContent = labels[i];
+        const r = document.createElement('div'); r.className = 'row';
+        row.forEach(v => r.appendChild(choiceBtn(disp(v), v)));
+        box.appendChild(lab); box.appendChild(r);
+      });
+      document.getElementById('submitRow').classList.remove('hidden');
+      document.getElementById('submitBtn').textContent = 'Next';
+    } else {
+      const labels = ['sharps', 'flats'];
+      SIG_ROWS.forEach((row, i) => {
+        const lab = document.createElement('div'); lab.className = 'row-label'; lab.textContent = labels[i];
+        const r = document.createElement('div'); r.className = 'row';
+        row.forEach(v => r.appendChild(choiceBtn(disp(v), v)));
+        box.appendChild(lab); box.appendChild(r);
+      });
+      const r = document.createElement('div'); r.className = 'row';
+      r.appendChild(choiceBtn('None', 'NONE', 'none-btn'));
+      box.appendChild(r);
+      document.getElementById('submitRow').classList.remove('hidden');
+      document.getElementById('submitBtn').textContent = 'Submit';
+    }
+  }
+  function choiceBtn(label, val, extra) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'choice' + (extra ? ' ' + extra : '');
+    b.dataset.val = val;
+    b.textContent = label;
+    return b;
+  }
+  function renderSelectionUI() {
+    document.querySelectorAll('#choices .choice').forEach(b => {
+      b.classList.toggle('sel', quiz.selection.has(b.dataset.val));
+    });
+  }
+
+  function startTimer() {
+    stopTimer();
+    const start = Date.now();
+    quiz.timer = setInterval(() => {
+      const left = Math.max(0, timeLimitSec * 1000 - (Date.now() - start));
+      updateTimer(left / 1000);
+      if (left <= 0) { stopTimer(); onTimeout(); }
+    }, 80);
+  }
+  function stopTimer() {
+    if (quiz.timer) { clearInterval(quiz.timer); quiz.timer = null; }
+  }
+  function updateTimer(leftSec) {
+    document.getElementById('sec').textContent = Math.ceil(leftSec);
+    const bar = document.getElementById('bar');
+    bar.style.width = (leftSec / timeLimitSec) * 100 + '%';
+    if (leftSec <= timeLimitSec * 0.2)      bar.style.background = 'var(--bad)';
+    else if (leftSec <= timeLimitSec * 0.4) bar.style.background = 'var(--warn)';
+    else                                    bar.style.background = 'var(--good)';
+  }
+
+  function submitAnswer() {
+    if (quiz.busy) return;
+    if (quiz.selection.size === 0) return;        // nothing chosen -> ignore explicit Next/Submit
+    recordAnswer();
+  }
+  // record whatever is currently selected (used by explicit submit and by timeout)
+  function recordAnswer() {
+    const q = quiz.questions[quiz.current];
+    const sel = quiz.selection;
+    if (q.kind === 'note') {
+      const val = [...sel][0];
+      lockAnswer(val === q.expected, disp(val));
+    } else {
+      const acc = sel.has('NONE') ? [] : [...sel].filter(v => v !== 'NONE');
+      lockAnswer(setEq(acc, q.expected), describeSelection(sel));
+    }
+  }
+  function lockAnswer(correct, display) {
+    quiz.busy = true;
+    stopTimer();
+    quiz.answers.push({ raw: display, correct, missed: false });
+    advance();
+  }
+  function setEq(a, b) {
+    if (a.length !== b.length) return false;
+    const sa = [...a].sort(), sb = [...b].sort();
+    return sa.every((v, i) => v === sb[i]);
+  }
+  function describeSelection(sel) {
+    if (sel.has('NONE')) return 'none';
+    return [...sel].filter(v => v !== 'NONE')
+      .sort((a, b) => ACC_ORDER.indexOf(a) - ACC_ORDER.indexOf(b)).map(disp).join(', ');
+  }
+
+  function onTimeout() {
+    if (quiz.busy) return;
+    if (quiz.selection.size > 0) {                // picked something but didn't submit -> record it
+      recordAnswer();
+    } else {                                       // nothing picked -> counts as missing
+      quiz.busy = true;
+      stopTimer();
+      quiz.answers.push({ raw: '', correct: false, missed: true });
+      advance();
+    }
+  }
+
+  function advance() {
+    stopTimer();
+    quiz.current++;
+    if (quiz.current >= quiz.questions.length) showResults();
+    else renderQuestion();
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  function showResults() {
+    show('result');
+    const correct = quiz.answers.filter(a => a.correct).length;
+    const wrong = quiz.answers.length - correct;
+    document.getElementById('correctCount').textContent = correct;
+    document.getElementById('totalCount').textContent = quiz.answers.length;
+    document.getElementById('cc').textContent = correct;
+    document.getElementById('wc').textContent = wrong;
+
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = '';
+    quiz.questions.forEach((q, i) => {
+      const a = quiz.answers[i];
+      const your = a.missed
+        ? '<span class="your miss">(no answer)</span>'
+        : `<span class="your">${escapeHtml(a.raw)}</span>`;
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        `<td class="num">${i + 1}</td>` +
+        `<td class="qtext">${escapeHtml(q.promptText)}</td>` +
+        `<td>${your}</td>` +
+        `<td class="correct">${escapeHtml(q.correctDisplay)}</td>` +
+        `<td class="status ${a.correct ? 'v' : 'x'}">${a.correct ? 'V' : 'X'}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ---------- events ----------
+  document.getElementById('startBtn').addEventListener('click', startQuiz);
+  document.getElementById('restartBtn').addEventListener('click', backToStart);
+  ['type1','type2','type3'].forEach(id => document.getElementById(id).addEventListener('change', updateStartEnabled));
+  document.getElementById('timeSlider').addEventListener('input', e => {
+    document.getElementById('timeVal').textContent = e.target.value;
+  });
+  updateStartEnabled();
+  document.getElementById('submitBtn').addEventListener('click', submitAnswer);
+  document.getElementById('choices').addEventListener('click', e => {
+    const btn = e.target.closest('.choice');
+    if (!btn || quiz.busy) return;
+    const val = btn.dataset.val;
+    const q = quiz.questions[quiz.current];
+    if (q.kind === 'note') {                       // single-select -> select, wait for Next
+      if (quiz.selection.has(val)) quiz.selection.clear();
+      else { quiz.selection.clear(); quiz.selection.add(val); }
+      renderSelectionUI();
+    } else {                                        // multi-select -> toggle, wait for Submit
+      if (val === 'NONE') {
+        if (quiz.selection.has('NONE')) quiz.selection.delete('NONE');
+        else { quiz.selection.clear(); quiz.selection.add('NONE'); }
+      } else {
+        quiz.selection.delete('NONE');
+        if (quiz.selection.has(val)) quiz.selection.delete(val);
+        else quiz.selection.add(val);
+      }
+      renderSelectionUI();
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    if (document.getElementById('quizScreen').classList.contains('hidden')) return;
+    submitAnswer();
+  });
+</script>
 </body>
 </html>
