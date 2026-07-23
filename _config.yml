@@ -1,0 +1,23 @@
+# GitHub Pages / Jekyll site configuration
+#
+# The "resources/" folder is kept in this repository for local / reference use,
+# but is EXCLUDED from the published site. Files in it are NOT served on the web
+# (requesting their URL returns 404). The files still live in the git repo.
+#
+# Note: setting "exclude" REPLACES Jekyll's default exclude list, so the standard
+# defaults are re-listed below to keep the build behaviour unchanged.
+exclude:
+  # --- our private (unpublished) folder ---
+  - "resources/"
+
+  # --- Jekyll default excludes (preserved) ---
+  - ".sass-cache"
+  - ".jekyll-cache"
+  - "gemfiles"
+  - "Gemfile"
+  - "Gemfile.lock"
+  - "node_modules"
+  - "vendor/bundle/"
+  - "vendor/cache/"
+  - "vendor/gems/"
+  - "vendor/ruby/"
