@@ -1,0 +1,134 @@
+#!/bin/sh
+#
+# pre-commit hook for the webpage (static HTML/CSS/JS) project.
+# Installed version-controlled via:  git config core.hooksPath .githooks
+#
+# What it checks on STAGED content only:
+#   1. Merge-conflict markers, trailing whitespace, missing final newline
+#   2. .js files pass `node --check` (syntax)
+#   3. No leftover debug code (console.log / debugger) in staged .js
+#   4. No staged file larger than 1 MB (catches accidental binaries / dumps)
+#
+# Bypass everything for a one-off commit:  git commit --no-verify
+#
+
+set -u
+
+# --- colors (disabled when output is not a tty) ---
+if [ -t 1 ]; then
+  RED='\033[31m'; YEL='\033[33m'; GRN='\033[32m'; RST='\033[0m'; BOLD='\033[1m'
+else
+  RED=''; YEL=''; GRN=''; RST=''; BOLD=''
+fi
+fail() { printf "${RED}  ✗ %s${RST}\n" "$1"; }
+warn() { printf "${YEL}  ⚠ %s${RST}\n" "$1"; }
+pass() { printf "${GRN}  ✓ %s${RST}\n" "$1"; }
+info() { printf "${BOLD}▸ %s${RST}\n" "$1"; }
+
+# only run when there is something staged for commit
+if ! git diff --cached --quiet; then :; else
+  # nothing staged (e.g. `git commit` with no -a and nothing added) -> skip
+  exit 0
+fi
+
+staged_files=$(git diff --cached --name-only --diff-filter=ACM --)
+
+errors=0
+
+# ---------------------------------------------------------------------------
+# 1. whitespace + conflict markers + missing final newline (git's built-in)
+# ---------------------------------------------------------------------------
+info "whitespace & conflict markers"
+ws_out=$(git diff --cached --check --)
+if [ -n "$ws_out" ]; then
+  printf "%s\n" "$ws_out" | sed 's/^/    /'
+  errors=$((errors + 1))
+else
+  pass "no trailing whitespace / conflict markers"
+fi
+
+# missing newline at EOF — inspect staged blobs, not working tree
+info "final newline"
+neof=0
+for f in $staged_files; do
+  case "$f" in
+    *.png|*.jpg|*.jpeg|*.gif|*.webp|*.ico|*.pdf|*.zip|*.mp3|*.mp4|*.woff2) continue ;;
+  esac
+  # last byte of the staged version of the file
+  last=$(git show ":$f" 2>/dev/null | tail -c1 | od -An -c | tr -d ' ')
+  [ -n "$last" ] && [ "$last" != '\n' ] && {
+    warn "no newline at end of $f"
+    neof=$((neof + 1))
+  }
+done
+[ "$neof" -eq 0 ] && pass "all text files end with newline"
+
+# ---------------------------------------------------------------------------
+# 2. JavaScript syntax check
+# ---------------------------------------------------------------------------
+js_files=$(printf "%s\n" "$staged_files" | grep -E '\.js$' || true)
+if [ -n "$js_files" ]; then
+  info "js syntax (node --check)"
+  if command -v node >/dev/null 2>&1; then
+    for f in $js_files; do
+      if git show ":$f" | node --check 2>/tmp/pc_node_err; then
+        pass "$f"
+      else
+        fail "$f"
+        sed 's/^/    /' /tmp/pc_node_err
+        errors=$((errors + 1))
+      fi
+    done
+    rm -f /tmp/pc_node_err
+  else
+    warn "node not found — skipping js syntax check"
+  fi
+fi
+
+# ---------------------------------------------------------------------------
+# 3. leftover debug code in staged .js
+# ---------------------------------------------------------------------------
+if [ -n "$js_files" ]; then
+  info "debug leftovers (console.log / debugger)"
+  dbg=0
+  for f in $js_files; do
+    # only look at newly-added lines in this commit
+    hits=$(git diff --cached --unified=0 -- "$f" \
+           | grep -E '^\+' | grep -nE '\bconsole\.log\b|\bdebugger\b' || true)
+    if [ -n "$hits" ]; then
+      warn "debug code added in $f:"
+      printf "%s\n" "$hits" | sed 's/^/    /'
+      dbg=$((dbg + 1))
+    fi
+  done
+  [ "$dbg" -eq 0 ] && pass "no debug leftovers"
+fi
+
+# ---------------------------------------------------------------------------
+# 4. large-file guard
+# ---------------------------------------------------------------------------
+info "large file guard (1 MB)"
+big=0
+while IFS= read -r f; do
+  [ -z "$f" ] && continue
+  size=$(git cat-file -s ":$f" 2>/dev/null || echo 0)
+  if [ "$size" -gt 1048576 ]; then
+    fail "$(printf "%.1f MB  %s" "$(echo "$size/1048576" | bc -l)" "$f")"
+    big=$((big + 1))
+  fi
+done <<EOF
+$staged_files
+EOF
+[ "$big" -eq 0 ] && pass "no oversized files"
+
+# ---------------------------------------------------------------------------
+# verdict
+# ---------------------------------------------------------------------------
+if [ "$errors" -gt 0 ] || [ "$big" -gt 0 ]; then
+  printf "\n${RED}${BOLD}pre-commit: %d hard error(s). Commit aborted.${RST}\n" "$((errors + big))"
+  printf "${BOLD}Fix and re-stage, or bypass with: git commit --no-verify${RST}\n"
+  exit 1
+fi
+
+printf "\n${GRN}${BOLD}pre-commit: all checks passed.${RST}\n"
+exit 0
