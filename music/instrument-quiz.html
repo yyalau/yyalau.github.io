@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instruments &amp; Terms Quiz</title>
+<link rel="stylesheet" href="quiz.css">
+</head>
+<body>
+<div class="wrap">
+  <h1>🎻 Instruments &amp; Terms Quiz</h1>
+  <p class="sub">20 true/false questions · no time limit · instruments, clefs, terms &amp; voices.</p>
+
+  <!-- Start screen -->
+  <div id="startScreen" class="card">
+    <p class="prompt" style="margin-top:0">🎻 Ready? Here's how it works.</p>
+
+    <div class="section-title">Quiz rules</div>
+    <ul class="rules">
+      <li><b>20 true/false questions</b> per round. There is <b>no time limit</b> - take your time.</li>
+      <li>You <b>can't pick the question type</b>. All kinds below are mixed together at random.</li>
+      <li>Read the statement, tap <b>True</b> or <b>False</b> (it turns blue), then press <b>Submit</b> (or Enter).</li>
+      <li>You can change your mind before pressing Submit. You can't go back once submitted.</li>
+      <li>At the end you'll get a score and a full question-by-question review.</li>
+    </ul>
+
+    <div class="section-title">What kind of statements?</div>
+    <ul class="rules">
+      <li>A term's meaning - e.g. <b>"Arco means to play with the bow."</b></li>
+      <li>A percussion instrument's pitch - <b>definite</b> or <b>indefinite</b>.</li>
+      <li>An instrument's family - <b>string / brass / woodwind</b>.</li>
+      <li>Whether an instrument is <b>transposing</b> or <b>non-transposing</b>.</li>
+      <li>Which instrument has a <b>higher range</b> within a family.</li>
+      <li>The <b>highest / lowest</b> sounding instrument in a family.</li>
+      <li>Single vs <b>double reed</b> instruments.</li>
+      <li>Which <b>voice</b> has a higher range (soprano &hellip; bass).</li>
+      <li>Which <b>clef</b> an instrument uses.</li>
+      <li>Whether a term (e.g. <b>con sord.</b>, <b>una corda</b>, <b>pizzicato</b>) can be used on a given instrument.</li>
+      <li>Whether an instrument can <b>only play one note at a time</b>.</li>
+    </ul>
+
+    <div class="section-title">How to answer</div>
+    <div class="note-box">
+      <p style="margin:0">Tap <b>True</b> or <b>False</b> - your pick turns blue - then press <b>Submit</b> (or press <b>Enter</b>). The Submit button stays disabled until you've picked one.</p>
+      <p class="hint" style="margin:10px 0 0">Based on the orchestra &amp; terms reference. Answer each statement <b>true</b> or <b>false</b>.</p>
+    </div>
+    <div class="actions" style="text-align:left"><button id="startBtn">Start Quiz</button></div>
+  </div>
+
+  <!-- Quiz screen -->
+  <div id="quizScreen" class="card hidden">
+    <div class="topbar">
+      <div class="qnum">Question <b id="qIdx">1</b><span> / </span><span id="qTotal">20</span></div>
+      <div class="timer">
+        <div class="track"><div class="bar" id="bar"></div></div>
+        <div class="sec" id="sec">30</div>
+      </div>
+    </div>
+    <div class="progress"><div id="overallBar"></div></div>
+    <div class="prompt" id="prompt"></div>
+    <div class="choices" id="choices"></div>
+    <div class="submit-row hidden" id="submitRow"><button id="submitBtn">Submit</button></div>
+    <p class="hint" id="liveHint"></p>
+  </div>
+
+  <!-- Result screen -->
+  <div id="resultScreen" class="card hidden">
+    <div class="result-banner">
+      <div class="score"><span class="good" id="correctCount">0</span><span class="slash"> / </span><span id="totalCount">20</span></div>
+      <div class="result-sub">Correct: <b id="cc">0</b> &nbsp;·&nbsp; Wrong (incl. missing): <b id="wc">0</b></div>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Statement</th><th>Your answer</th><th>Correct answer</th><th>V/X</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="actions"><button id="restartBtn">New Quiz</button></div>
+  </div>
+</div>
+
+<script src="quiz-core.js"></script>
+<script src="instrument-quiz-data.js"></script>
+<script>
+  var core = new QuizCore({
+    totalQuestions: 20,
+    hasTimer: false,
+    requireSelection: true,
+    getPool: function () { return buildInstrumentPool(); },
+    renderChoices: function (q, box, ui) {
+      box.innerHTML = '';
+      var r = document.createElement('div');
+      r.className = 'row tf-choices';
+      r.appendChild(ui.choiceBtn('True', 'true'));
+      r.appendChild(ui.choiceBtn('False', 'false'));
+      box.appendChild(r);
+      ui.setSubmitLabel('Submit');
+    },
+    onTap: function (q, val, sel) {
+      if (sel.has(val)) sel.clear();            // tap again to unselect
+      else { sel.clear(); sel.add(val); }
+    },
+    evalAnswer: function (q, sel) {
+      var val = Array.from(sel)[0];
+      return {
+        correct: (val === 'true') === q.expected,
+        display: val === 'true' ? 'True' : 'False'
+      };
+    }
+  });
+</script>
+</body>
+</html>

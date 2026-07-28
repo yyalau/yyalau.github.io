@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Quizzes</title>
+<link rel="stylesheet" href="quiz.css">
+<style>
+  .quiz-list { display:flex; flex-direction:column; gap:14px; margin-top: 6px; }
+  .quiz-link {
+    display:block; text-decoration:none; color:var(--text);
+    background: var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:18px 20px; transition: border-color .15s, background .15s, transform .05s;
+  }
+  .quiz-link:hover { border-color: var(--accent); background:#16243a; }
+  .quiz-link:active { transform: translateY(1px); }
+  .quiz-link h2 { margin:0 0 4px; font-size:1.2rem; color:var(--text); }
+  .quiz-link p { margin:0; color:var(--muted); font-size:.92rem; line-height:1.45; }
+  .quiz-link .tag { color: var(--accent); font-weight:700; }
+  .home { color:var(--muted); text-decoration:none; font-size:.9rem; }
+  .home:hover { color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎼 Music Quizzes</h1>
+  <p class="sub">Pick a quiz to practise. Each runs in your browser - no sign-in, no data sent anywhere.</p>
+  <div class="quiz-list">
+    <a class="quiz-link" href="key-signature-quiz.html">
+      <h2>🎼 Key Signature Quiz</h2>
+      <p><span class="tag">20 questions · timed</span> &nbsp; Major &amp; minor keys, sharps &amp; flats. Identify the key from its signature, the signature from the key, and relative keys.</p>
+    </a>
+    <a class="quiz-link" href="instrument-quiz.html">
+      <h2>🎻 Instruments &amp; Terms Quiz</h2>
+      <p><span class="tag">20 true/false · no time limit</span> &nbsp; Orchestra instruments, clefs, transposing/reed types, ranges, voices and musical terms.</p>
+    </a>
+  </div>
+  <p style="margin-top:22px"><a class="home" href="../index.html">&larr; back to site home</a></p>
+</div>
+</body>
+</html>
