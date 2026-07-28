@@ -7,8 +7,9 @@
 # Note: setting "exclude" REPLACES Jekyll's default exclude list, so the standard
 # defaults are re-listed below to keep the build behaviour unchanged.
 exclude:
-  # --- our private (unpublished) folder ---
+  # --- our private (unpublished) files / folders ---
   - "resources/"
+  - "agents.md"   # agent instructions; never served on the site
 
   # --- Jekyll default excludes (preserved) ---
   - ".sass-cache"
