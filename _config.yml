@@ -9,7 +9,7 @@
 exclude:
   # --- our private (unpublished) files / folders ---
   - "resources/"
-  - "agents.md"   # agent instructions; never served on the site
+  - "AGENTS.md"   # agent instructions; never served on the site
 
   # --- Jekyll default excludes (preserved) ---
   - ".sass-cache"
