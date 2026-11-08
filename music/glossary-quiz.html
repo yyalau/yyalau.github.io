@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Terms Quiz</title>
+<link rel="stylesheet" href="quiz.css">
+</head>
+<body>
+<div class="wrap">
+  <h1>📖 Music Terms Quiz</h1>
+  <p class="sub">Multiple choice of 4 · no time limit · instant feedback after each answer.</p>
+
+  <!-- Start screen -->
+  <div id="startScreen" class="card">
+    <p class="prompt" style="margin-top:0">📖 Choose your grade, then start.</p>
+
+    <div class="section-title">Quiz rules</div>
+    <ul class="rules">
+      <li>Every question is <b>multiple choice of 4</b>. There is <b>no time limit</b> - take your time.</li>
+      <li>Pick a <b>grade</b> and the quiz uses <b>every term</b> in it - so the length depends on the grade.</li>
+      <li><b>Mixed</b> mode: <b>8 questions from Grade 5</b> + <b>3 questions from each of Grades 1-4</b> = 20 questions.</li>
+      <li>Tap one answer (it turns blue), press <b>Submit</b> (or Enter), see <b>feedback right away</b>, then press <b>Next</b>.</li>
+      <li>You can't go back once you've submitted. At the end you'll see a full review.</li>
+    </ul>
+
+    <div class="section-title">1. Choose your grade</div>
+    <div class="opt-grid" id="gradeRow">
+      <label class="type-opt"><input type="radio" name="grade" value="1"><span><b>Grade 1</b></span></label>
+      <label class="type-opt"><input type="radio" name="grade" value="2"><span><b>Grade 2</b></span></label>
+      <label class="type-opt"><input type="radio" name="grade" value="3"><span><b>Grade 3</b></span></label>
+      <label class="type-opt"><input type="radio" name="grade" value="4"><span><b>Grade 4</b></span></label>
+      <label class="type-opt"><input type="radio" name="grade" value="5"><span><b>Grade 5</b></span></label>
+      <label class="type-opt"><input type="radio" name="grade" value="mixed"><span><b>Mixed</b></span></label>
+    </div>
+
+    <div class="section-title">2. Choose your terms</div>
+    <div class="opt-grid" id="langRow"></div>
+    <p class="hint" id="langHint" style="margin:4px 0 0"></p>
+
+    <div class="actions" style="text-align:left"><button id="startBtn" disabled>Start Quiz</button></div>
+  </div>
+
+  <!-- Quiz screen -->
+  <div id="quizScreen" class="card hidden">
+    <div class="topbar">
+      <div class="qnum">Question <b id="qIdx">1</b><span> / </span><span id="qTotal">20</span></div>
+      <div class="timer">
+        <div class="track"><div class="bar" id="bar"></div></div>
+        <div class="sec" id="sec">30</div>
+      </div>
+    </div>
+    <div class="progress"><div id="overallBar"></div></div>
+    <div class="prompt" id="prompt"></div>
+    <div class="choices" id="choices"></div>
+    <div class="hidden" id="feedback"></div>
+    <div class="submit-row hidden" id="submitRow"><button id="submitBtn">Submit</button></div>
+    <p class="hint" id="liveHint"></p>
+  </div>
+
+  <!-- Result screen -->
+  <div id="resultScreen" class="card hidden">
+    <div class="result-banner">
+      <div class="score"><span class="good" id="correctCount">0</span><span class="slash"> / </span><span id="totalCount">20</span></div>
+      <div class="result-sub">Correct: <b id="cc">0</b> &nbsp;·&nbsp; Wrong (incl. missing): <b id="wc">0</b></div>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Question</th><th>Your answer</th><th>Correct answer</th><th>V/X</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="actions"><button id="restartBtn">New Quiz</button></div>
+  </div>
+</div>
+
+<script src="quiz-core.js"></script>
+<script src="glossary-quiz-data.js"></script>
+<script>
+  var byId = function (id) { return document.getElementById(id); };
+
+  // ---------- language groups per grade ----------
+  // Grades 1-4 are Italian only. Grade 5 and Mixed offer three groupings.
+  var LANG_OPTIONS = {
+    '5': [
+      { value: ['italian'],                label: 'Italian' },
+      { value: ['german', 'french'],       label: 'German + French' },
+      { value: ['italian', 'german', 'french'], label: 'Italian + German + French' }
+    ]
+  };
+
+  function renderLangOptions(grade) {
+    var box = byId('langRow');
+    var hint = byId('langHint');
+    box.innerHTML = '';
+    if (!grade) {
+      hint.textContent = 'Choose a grade or Mixed above to see the terms available.';
+      updateStartEnabled();
+      return;
+    }
+    var needsLang = (grade === '5' || grade === 'mixed');
+    var opts = needsLang
+      ? LANG_OPTIONS['5']
+      : [ { value: ['italian'], label: 'Italian' } ];
+    opts.forEach(function (o, i) {
+      var lab = document.createElement('label');
+      lab.className = 'type-opt';
+      var input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'lang';
+      input.value = o.value.join('+');
+      input.dataset.lang = o.value.join(',');
+      if (i === 0) input.checked = true;
+      var span = document.createElement('span');
+      span.innerHTML = '<b>' + o.label + '</b>';
+      lab.appendChild(input);
+      lab.appendChild(span);
+      box.appendChild(lab);
+    });
+    if (grade === '5') {
+      hint.textContent = 'Grade 5 has Italian, French and German terms. Pick Italian, German + French, or all three.';
+    } else if (grade === 'mixed') {
+      hint.textContent = 'Mixed: 8 questions from Grade 5 (in the language you pick here) + 3 questions from each of Grades 1-4 (Italian).';
+    } else {
+      hint.textContent = 'Grade ' + grade + ' terms are Italian.';
+    }
+    updateStartEnabled();
+  }
+
+  function selectedGrade() {
+    var r = document.querySelector('input[name="grade"]:checked');
+    return r ? r.value : null;
+  }
+  function selectedLangs() {
+    var r = document.querySelector('input[name="lang"]:checked');
+    return r ? (r.dataset.lang || '').split(',') : [];
+  }
+  function updateStartEnabled() {
+    byId('startBtn').disabled = !selectedGrade();
+  }
+
+  document.querySelectorAll('input[name="grade"]').forEach(function (el) {
+    el.addEventListener('change', function () { renderLangOptions(el.value); });
+  });
+  byId('langRow').addEventListener('change', updateStartEnabled);
+  renderLangOptions(null);
+
+  function sample(arr, n) {
+    return window.quizHelpers.shuffle(arr).slice(0, n);
+  }
+  function buildMixedPool(langs) {
+    var pool = sample(buildGlossaryPool('5', langs), 8);
+    ['1', '2', '3', '4'].forEach(function (gr) {
+      pool = pool.concat(sample(buildGlossaryPool(gr, ['italian']), 3));
+    });
+    return pool;
+  }
+
+  // ---------- engine config ----------
+  var core = new QuizCore({
+    totalQuestions: Infinity,
+    hasTimer: false,
+    requireSelection: true,
+    feedback: true,
+    markChoices: function (q, r) {
+      var btns = document.querySelectorAll('#choices .choice');
+      Array.prototype.forEach.call(btns, function (b) {
+        if (b.dataset.val === q.correctVal) b.classList.add('is-correct');
+        else if (b.dataset.val === r.chosen) b.classList.add('is-wrong');
+      });
+    },
+    getPool: function () {
+      var grade = selectedGrade();
+      if (!grade) return [];
+      var langs = selectedLangs();
+      if (grade === 'mixed') return buildMixedPool(langs);
+      return buildGlossaryPool(grade, langs);
+    },
+    renderChoices: function (q, box, ui) {
+      box.innerHTML = '';
+      var r = document.createElement('div');
+      r.className = 'row mcq';
+      var opts = window.quizHelpers.shuffle(q.options);
+      opts.forEach(function (label) {
+        r.appendChild(ui.choiceBtn(label, label));
+      });
+      box.appendChild(r);
+      ui.setSubmitLabel('Submit');
+    },
+    onTap: function (q, val, sel) {
+      if (sel.has(val)) sel.clear(); // tap again to unselect
+      else { sel.clear(); sel.add(val); }
+    },
+    evalAnswer: function (q, sel) {
+      var val = Array.from(sel)[0];
+      return { correct: val === q.correctVal, display: val, chosen: val };
+    }
+  });
+</script>
+</body>
+</html>

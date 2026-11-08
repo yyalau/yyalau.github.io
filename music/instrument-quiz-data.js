@@ -17,7 +17,7 @@
     { name: 'Cello',       family: 'string',   clefs: ['bass'],          transposing: false },
     { name: 'Double bass', family: 'string',   clefs: ['bass'],          transposing: true  },
     { name: 'Harp',        family: 'string',   clefs: ['treble','bass'], transposing: false },
-    { name: 'Piccolo',     family: 'woodwind', clefs: ['treble'],        transposing: false, reed: 'none'   },
+    { name: 'Piccolo',     family: 'woodwind', clefs: ['treble'],        transposing: true,  reed: 'none'   },
     { name: 'Flute',       family: 'woodwind', clefs: ['treble'],        transposing: false, reed: 'none'   },
     { name: 'Oboe',        family: 'woodwind', clefs: ['treble'],        transposing: false, reed: 'double' },
     { name: 'Clarinet',    family: 'woodwind', clefs: ['treble'],        transposing: true,  reed: 'single' },

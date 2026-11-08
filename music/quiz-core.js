@@ -47,12 +47,16 @@
     this.hasTimer = !!cfg.hasTimer;
     this.getTimeLimit = cfg.getTimeLimit || function () { return 30; };
     this.requireSelection = !!cfg.requireSelection;
+    this.feedback = !!cfg.feedback;
+    this.renderFeedback = cfg.renderFeedback;
+    this.markChoices = cfg.markChoices;
 
     this.questions = [];
     this.current = 0;
     this.answers = [];
     this.selection = new Set();
     this.busy = false;
+    this.feedbackPending = false;
     this.timer = null;
     this.timeLimitSec = 30;
 
@@ -70,8 +74,10 @@
   };
 
   QuizCore.prototype._initChrome = function () {
-    var qt = byId('qTotal'); if (qt) qt.textContent = this.totalQuestions;
-    var tc = byId('totalCount'); if (tc) tc.textContent = this.totalQuestions;
+    if (isFinite(this.totalQuestions)) {
+      var qt = byId('qTotal'); if (qt) qt.textContent = this.totalQuestions;
+      var tc = byId('totalCount'); if (tc) tc.textContent = this.totalQuestions;
+    }
     if (!this.hasTimer) {
       var t = document.querySelector('.timer');
       if (t) t.classList.add('hidden');
@@ -111,9 +117,14 @@
     var pool = this.getPool ? this.getPool() : [];
     if (!pool || pool.length === 0) return;
     this.timeLimitSec = this.getTimeLimit() || 30;
-    this.questions = shuffle(pool).slice(0, this.totalQuestions);
+    this.questions = shuffle(pool);
+    if (isFinite(this.totalQuestions)) {         // Infinity -> use every question (no cap)
+      this.questions = this.questions.slice(0, this.totalQuestions);
+    }
     this.current = 0;
     this.answers = [];
+    var qt = byId('qTotal'); if (qt) qt.textContent = this.questions.length;
+    var tc = byId('totalCount'); if (tc) tc.textContent = this.questions.length;
     this.show('quiz');
     this._renderQuestion();
   };
@@ -128,6 +139,8 @@
     var q = this.questions[this.current];
     this.busy = false;
     this.selection = new Set();
+    this.feedbackPending = false;
+    var fb = byId('feedback'); if (fb) fb.classList.add('hidden');
     byId('qIdx').textContent = (this.current + 1);
     byId('prompt').innerHTML = q.promptHTML;
     byId('liveHint').textContent = this.hintFor(q);
@@ -181,6 +194,11 @@
   };
 
   QuizCore.prototype.submit = function () {
+    if (this.feedbackPending) {                // feedback shown -> button is "Next Question"
+      this.feedbackPending = false;
+      this._advance();
+      return;
+    }
     if (this.busy) return;
     if (this.selection.size === 0) return;     // nothing chosen -> ignore explicit submit
     this._recordAnswer();
@@ -188,13 +206,38 @@
   QuizCore.prototype._recordAnswer = function () {
     var q = this.questions[this.current];
     var r = this.evalAnswer(q, this.selection);
-    this._lockAnswer(r.correct, r.display);
+    this._lockAnswer(q, r);
   };
-  QuizCore.prototype._lockAnswer = function (correct, display) {
+  QuizCore.prototype._lockAnswer = function (q, r) {
     this.busy = true;
     this._stopTimer();
-    this.answers.push({ raw: display, correct: correct, missed: false });
-    this._advance();
+    this.answers.push({ raw: r.display, correct: r.correct, missed: false });
+    if (this.feedback) {
+      this.feedbackPending = true;
+      this._renderFeedback(q, r);
+    } else {
+      this._advance();
+    }
+  };
+  QuizCore.prototype._renderFeedback = function (q, r) {
+    var fb = byId('feedback');
+    if (fb) {
+      fb.innerHTML = '';
+      if (this.renderFeedback) {
+        this.renderFeedback(q, r, fb);
+      } else {
+        var el = document.createElement('div');
+        el.className = 'fb ' + (r.correct ? 'fb-ok' : 'fb-bad');
+        el.innerHTML = '<b>' + (r.correct ? 'Correct!' : 'Not quite.') + '</b> ' +
+          'The answer is <span class="given">' + escapeHtml(q.correctDisplay) + '</span>.';
+        fb.appendChild(el);
+      }
+      fb.classList.remove('hidden');
+    }
+    if (this.markChoices) this.markChoices(q, r);
+    var last = this.current >= this.questions.length - 1;
+    var sb = byId('submitBtn');
+    if (sb) sb.textContent = last ? 'See Results' : 'Next Question';
   };
   QuizCore.prototype._onTimeout = function () {
     if (this.busy) return;

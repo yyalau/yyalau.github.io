@@ -19,7 +19,7 @@
 
 | Instrument | Treble clef | Alto C clef | Tenor C clef | Bass clef | Reed | Transposing |
 |---|:---:|:---:|:---:|:---:|---|---|
-| Piccolo | V | | | | No | X |
+| Piccolo | V | | | | No | In C: sounds one octave higher than written |
 | Flute | V | | | | No | X |
 | Oboe | V | | | | Double | x |
 | Clarinet | V | | | | Single | In B♭: sounds one major 2nd lower than written<br>In A: sounds one minor 3rd lower than written<br>In E♭: sounds one major 6th lower than written |
