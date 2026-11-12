@@ -2,7 +2,7 @@
   instrument-quiz-data.js - question pool for the Instruments & Terms quiz.
   All questions are true/false. The data follows resources/instruments.md.
 
-  Exposes buildInstrumentPool(shuffleFn?) -> [question] where each question is:
+  Exposes buildInstrumentPool(shuffleFn?, categories?) -> [question] where each question is:
     { type, promptText, promptHTML, expected(Boolean), correctDisplay, hint }
   In the browser it also attaches to window; in Node it exports via module.exports
   so the pool can be unit-tested.
@@ -102,10 +102,9 @@
     return a;
   }
 
-  // ---------- build the full (capped, shuffled) pool ----------
-  function buildInstrumentPool(shuffleFn, perType) {
+  // ---------- build the selected categories' shuffled pool ----------
+  function buildInstrumentPool(shuffleFn, categories) {
     var shuffle = shuffleFn || (global.quizHelpers && global.quizHelpers.shuffle) || localShuffle;
-    var PER_TYPE = (typeof perType === 'number' && perType >= 0) ? perType : 10;
     var t1 = [], t2 = [], t3 = [], t4 = [], t5 = [], t6 = [], t7 = [], t8 = [], t9 = [], t10 = [], t11 = [];
     var i, j;
 
@@ -238,12 +237,18 @@
       t11.push(makeQ(11, 'The **' + im.name + '** can only play one note at a time.', mono));
     }
 
-    // cap each type so no single type dominates a round, then shuffle
-    var groups = [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11];
-    var capped = groups.map(function (g) { return PER_TYPE === Infinity ? g.slice() : shuffle(g).slice(0, PER_TYPE); });
+    var byCat = {
+      terms: t1.concat(t10),
+      pitch: t2,
+      transposing: t4,
+      family: t3.concat(t11),
+      reed: t7,
+      clef: t9.concat(t5, t6, t8)
+    };
+    var keys = categories && categories.length ? categories : Object.keys(byCat);
     var flat = [];
-    for (i = 0; i < capped.length; i++) {
-      for (j = 0; j < capped[i].length; j++) flat.push(capped[i][j]);
+    for (i = 0; i < keys.length; i++) {
+      if (byCat[keys[i]]) flat = flat.concat(byCat[keys[i]]);
     }
     return shuffle(flat);
   }

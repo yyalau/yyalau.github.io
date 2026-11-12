@@ -9,7 +9,7 @@
 <body>
 <div class="wrap">
   <h1>🎻 Instruments &amp; Terms Quiz</h1>
-  <p class="sub">20 true/false questions · no time limit · instruments, clefs, terms &amp; voices.</p>
+  <p class="sub">Up to 20 true/false questions · no time limit · instruments, clefs, terms &amp; voices.</p>
 
   <!-- Start screen -->
   <div id="startScreen" class="card">
@@ -17,27 +17,23 @@
 
     <div class="section-title">Quiz rules</div>
     <ul class="rules">
-      <li><b>20 true/false questions</b> per round. There is <b>no time limit</b> - take your time.</li>
-      <li>You <b>can't pick the question type</b>. All kinds below are mixed together at random.</li>
+      <li><b>Up to 20 true/false questions</b> per round. There is <b>no time limit</b> - take your time.</li>
+      <li><b>Pick the question types</b> below. All selected types are mixed together at random.</li>
       <li>Read the statement, tap <b>True</b> or <b>False</b> (it turns blue), then press <b>Submit</b> (or Enter).</li>
       <li>You can change your mind before pressing Submit. You can't go back once submitted.</li>
       <li>At the end you'll get a score and a full question-by-question review.</li>
     </ul>
 
-    <div class="section-title">What kind of statements?</div>
-    <ul class="rules">
-      <li>A term's meaning - e.g. <b>"Arco means to play with the bow."</b></li>
-      <li>A percussion instrument's pitch - <b>definite</b> or <b>indefinite</b>.</li>
-      <li>An instrument's family - <b>string / brass / woodwind</b>.</li>
-      <li>Whether an instrument is <b>transposing</b> or <b>non-transposing</b>.</li>
-      <li>Which instrument has a <b>higher range</b> within a family.</li>
-      <li>The <b>highest / lowest</b> sounding instrument in a family.</li>
-      <li>Single vs <b>double reed</b> instruments.</li>
-      <li>Which <b>voice</b> has a higher range (soprano &hellip; bass).</li>
-      <li>Which <b>clef</b> an instrument uses.</li>
-      <li>Whether a term (e.g. <b>con sord.</b>, <b>una corda</b>, <b>pizzicato</b>) can be used on a given instrument.</li>
-      <li>Whether an instrument can <b>only play one note at a time</b>.</li>
-    </ul>
+    <div class="section-title">Choose question types</div>
+    <div class="type-list">
+      <label class="type-opt"><input type="checkbox" id="catTerms" checked><span><b>Terms &amp; usage</b><br><small>Term meanings and whether a term can be used on an instrument</small></span></label>
+      <label class="type-opt"><input type="checkbox" id="catPitch" checked><span><b>Definite / indefinite pitch</b><br><small>The pitch of percussion instruments</small></span></label>
+      <label class="type-opt"><input type="checkbox" id="catTransposing" checked><span><b>Transposing</b><br><small>Transposing or non-transposing instruments</small></span></label>
+      <label class="type-opt"><input type="checkbox" id="catFamily" checked><span><b>Family &amp; notes at a time</b><br><small>Instrument families and whether only one note can be played at a time</small></span></label>
+      <label class="type-opt"><input type="checkbox" id="catReed" checked><span><b>Reed</b><br><small>Single, double, or no reed</small></span></label>
+      <label class="type-opt"><input type="checkbox" id="catClef" checked><span><b>Clef, range &amp; voice</b><br><small>Instrument clefs, higher and highest / lowest ranges, and voice ranges</small></span></label>
+    </div>
+    <p class="hint" style="margin:0 0 14px">Tick any combination. Each round draws up to 20 questions from your selection.</p>
 
     <div class="section-title">How to answer</div>
     <div class="note-box">
@@ -84,11 +80,32 @@
 <script src="quiz-core.js"></script>
 <script src="instrument-quiz-data.js"></script>
 <script>
+  var CATS = [
+    { id: 'catTerms', key: 'terms' },
+    { id: 'catPitch', key: 'pitch' },
+    { id: 'catTransposing', key: 'transposing' },
+    { id: 'catFamily', key: 'family' },
+    { id: 'catReed', key: 'reed' },
+    { id: 'catClef', key: 'clef' }
+  ];
+  function selectedCategories() {
+    return CATS.filter(function (c) {
+      return document.getElementById(c.id).checked;
+    }).map(function (c) { return c.key; });
+  }
+  function updateStartEnabled() {
+    document.getElementById('startBtn').disabled = selectedCategories().length === 0;
+  }
+  CATS.forEach(function (c) {
+    document.getElementById(c.id).addEventListener('change', updateStartEnabled);
+  });
+  updateStartEnabled();
+
   var core = new QuizCore({
     totalQuestions: 20,
     hasTimer: false,
     requireSelection: true,
-    getPool: function () { return buildInstrumentPool(); },
+    getPool: function () { return buildInstrumentPool(undefined, selectedCategories()); },
     renderChoices: function (q, box, ui) {
       box.innerHTML = '';
       var r = document.createElement('div');
