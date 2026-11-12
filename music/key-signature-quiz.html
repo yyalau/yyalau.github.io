@@ -28,7 +28,7 @@
     <ul class="rules">
       <li><b>Signature -> key:</b> "If a key has 3 sharps (F♯ C♯ G♯), the major key is ____" &rarr; e.g. answer: <b>A</b></li>
       <li><b>Key -> signature:</b> "If it is A major, its key signature is ____" &rarr; e.g. answer: tap <b>F♯ C♯ G♯</b></li>
-      <li><b>Relative keys:</b> "What is the relative minor of C major?" &rarr; e.g. answer: <b>a</b></li>
+      <li><b>Relative keys:</b> "What is the relative minor of C major?" &rarr; <b>a</b>, or "the relative major of a minor?" &rarr; <b>C</b>. Pick major&rarr;minor, minor&rarr;major, or both.</li>
       <li>Both <b>major</b> and <b>minor</b> keys can show up in any style.</li>
     </ul>
 
@@ -51,9 +51,15 @@
     <div class="type-list">
       <label class="type-opt"><input type="checkbox" id="type1" checked><span><b>Signature -> key</b><br><small>Given the sharps/flats, find the major or minor key</small></span></label>
       <label class="type-opt"><input type="checkbox" id="type2" checked><span><b>Key -> signature</b><br><small>Given the key, find its sharps/flats</small></span></label>
-      <label class="type-opt"><input type="checkbox" id="type3" checked><span><b>Relative keys</b><br><small>Find the relative major or minor</small></span></label>
+      <div class="type-opt relative-group">
+        <label class="group-opt"><input type="checkbox" id="type3" checked><span><b>Relative keys</b><br><small>Find the relative key - tick to include both directions</small></span></label>
+        <div class="subopts">
+          <label class="subopt"><input type="checkbox" id="type3a" checked><span><b>Major -> minor</b><br><small>Find the relative minor of a major key</small></span></label>
+          <label class="subopt"><input type="checkbox" id="type3b" checked><span><b>minor -> major</b><br><small>Find the relative major of a minor key</small></span></label>
+        </div>
+      </div>
     </div>
-    <p class="hint" style="margin:0 0 14px">You can tick more than one - pick any one, two, or all three. Each round draws 20 questions from your selection.</p>
+    <p class="hint" style="margin:0 0 14px">Tick any combination. Under <b>Relative keys</b> you can pick one direction or both. Each round draws 20 questions from your selection.</p>
     <div class="actions" style="text-align:left"><button id="startBtn">Start Quiz</button></div>
   </div>
 
@@ -194,16 +200,16 @@
         promptText:  'If it is ' + minD + ' minor, what sharps/flats does it have?',
         expected: sigExp, correctDisplay: sigDisp, hint: HINT_SIG,
       });
-      // Style 3: relative minor of a major key
+      // Style 3: relative minor of a major key (major -> minor)
       pool.push({
         kind: 'note', multi: false, style: 3,
         promptHTML: 'The <b>relative minor</b> of <span class="given">' + majD + ' major</span> is <span class="blank-mark">______</span>',
         promptText:  'What is the relative minor of ' + majD + ' major?',
         expected: minN, correctDisplay: minD + ' minor', hint: HINT_NOTE,
       });
-      // Style 3: relative major of a minor key
+      // Style 4: relative major of a minor key (minor -> major)
       pool.push({
-        kind: 'note', multi: false, style: 3,
+        kind: 'note', multi: false, style: 4,
         promptHTML: 'The <b>relative major</b> of <span class="given">' + minD + ' minor</span> is <span class="blank-mark">______</span>',
         promptText:  'What is the relative major of ' + minD + ' minor?',
         expected: majN, correctDisplay: majD + ' major', hint: HINT_NOTE,
@@ -218,18 +224,36 @@
     var s = [];
     if (byId('type1').checked) s.push(1);
     if (byId('type2').checked) s.push(2);
-    if (byId('type3').checked) s.push(3);
+    if (byId('type3a').checked) s.push(3);
+    if (byId('type3b').checked) s.push(4);
     return s;
   }
   function updateStartEnabled() {
     byId('startBtn').disabled = selectedStyles().length === 0;
   }
+  // parent "Relative keys" reflects its two direction sub-options
+  function syncRelativeParent() {
+    var a = byId('type3a').checked, b = byId('type3b').checked;
+    byId('type3').checked = a && b;
+    byId('type3').indeterminate = a !== b;
+  }
   byId('timeSlider').addEventListener('input', function (e) {
     byId('timeVal').textContent = e.target.value;
   });
-  ['type1','type2','type3'].forEach(function (id) {
-    byId(id).addEventListener('change', updateStartEnabled);
+  byId('type3').addEventListener('change', function () {
+    var on = byId('type3').checked;
+    byId('type3a').checked = on;
+    byId('type3b').checked = on;
+    byId('type3').indeterminate = false;
+    updateStartEnabled();
   });
+  ['type1','type2','type3a','type3b'].forEach(function (id) {
+    byId(id).addEventListener('change', function () {
+      syncRelativeParent();
+      updateStartEnabled();
+    });
+  });
+  syncRelativeParent();
   updateStartEnabled();
 
   // ---------- describe a multi-select signature answer for the review ----------
