@@ -1,6 +1,6 @@
 /*
   glossary-quiz-data.js - question pool for the Music Terms (Glossary) quiz.
-  Data follows resources/glossaryV2.md. Questions are multiple choice (4 options).
+  Data follows hidden/glossaryV2.md. Questions are multiple choice (4 options).
 
   Exposes buildGlossaryPool(grade, langs) -> [question] where each question is:
     { promptText, promptHTML, correctDisplay, correctVal, options[4], hint }
@@ -11,7 +11,7 @@
 (function (global) {
   'use strict';
 
-  // ---------- reference data (from resources/glossaryV2.md) ----------
+  // ---------- reference data (from hidden/glossaryV2.md) ----------
   // t = term, m = short clean meaning used for the options.
   var GLOSSARY = {
     '1': {

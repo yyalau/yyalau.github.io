@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title | default: "Study Notes" }}</title>
+    <link rel="stylesheet" href="{{ '/assets/note.css' | relative_url }}">
+    <script>
+    (function () {
+        var theme = null;
+        try { theme = localStorage.getItem('note-theme'); } catch (e) {}
+        if (theme !== 'dark' && theme !== 'light' && theme !== 'sepia') {
+            theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+    })();
+    </script>
+</head>
+<body>
+    <header class="topbar">
+        <a class="home-link" href="{{ '/resources/selfmanagement/' | relative_url }}">&larr; Notes</a>
+        <div class="progress-label" id="progressLabel"></div>
+        <select id="themeSelect" class="theme-select" aria-label="Colour theme">
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+            <option value="sepia">Sepia</option>
+        </select>
+        <button type="button" id="tocToggle" class="toc-toggle" aria-expanded="false" aria-controls="toc">Contents</button>
+        <div class="progress"><div id="progressBar"></div></div>
+    </header>
+    <nav id="toc" class="toc" aria-label="Table of contents"></nav>
+    <main class="wrap">
+        <article id="content" class="note">
+{{ content }}
+        </article>
+    </main>
+    <script src="{{ '/assets/note.js' | relative_url }}"></script>
+</body>
+</html>

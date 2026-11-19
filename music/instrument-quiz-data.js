@@ -1,6 +1,6 @@
 /*
   instrument-quiz-data.js - question pool for the Instruments & Terms quiz.
-  All questions are true/false. The data follows resources/instruments.md.
+  All questions are true/false. The data follows hidden/instruments.md.
 
   Exposes buildInstrumentPool(shuffleFn?, categories?) -> [question] where each question is:
     { type, promptText, promptHTML, expected(Boolean), correctDisplay, hint }
@@ -10,7 +10,7 @@
 (function (global) {
   'use strict';
 
-  // ---------- reference data (from resources/instruments.md) ----------
+  // ---------- reference data (from hidden/instruments.md) ----------
   var INSTR = [
     { name: 'Violin',      family: 'string',   clefs: ['treble'],        transposing: false },
     { name: 'Viola',       family: 'string',   clefs: ['alto'],          transposing: false },
