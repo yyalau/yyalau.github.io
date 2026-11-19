@@ -6,6 +6,18 @@
 #
 # Note: setting "exclude" REPLACES Jekyll's default exclude list, so the standard
 # defaults are re-listed below to keep the build behaviour unchanged.
+# Rewrite relative links to .md files (e.g. inside resources/selfmanagement notes) to the
+# URLs of the pages Jekyll generates from them. Whitelisted on GitHub Pages.
+plugins:
+  - jekyll-relative-links
+
+# Apply the shared note layout to every page under resources/selfmanagement.
+defaults:
+  - scope:
+      path: "resources/selfmanagement"
+    values:
+      layout: "note"
+
 exclude:
   # --- our private (unpublished) files / folders ---
   - "hidden/"
