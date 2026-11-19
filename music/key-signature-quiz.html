@@ -24,17 +24,18 @@
       <li>You can't go back. At the end you'll get a score and a full question-by-question review.</li>
     </ul>
 
-    <div class="section-title">Three question styles</div>
+    <div class="section-title">Four question styles</div>
     <ul class="rules">
-      <li><b>Signature -> key:</b> "If a key has 3 sharps (F♯ C♯ G♯), the major key is ____" &rarr; e.g. answer: <b>A</b></li>
-      <li><b>Key -> signature:</b> "If it is A major, its key signature is ____" &rarr; e.g. answer: tap <b>F♯ C♯ G♯</b></li>
+      <li><b>Signature -> key:</b> "If a key has 3 sharps (F♯ C♯ G♯), the major key is ____" &rarr; <b>A</b>. Pick signature&rarr;major, signature&rarr;minor, or both.</li>
+      <li><b>Key -> signature:</b> "If it is A major, its key signature is ____" &rarr; tap <b>F♯ C♯ G♯</b>. Pick major&rarr;signature, minor&rarr;signature, or both.</li>
       <li><b>Relative keys:</b> "What is the relative minor of C major?" &rarr; <b>a</b>, or "the relative major of a minor?" &rarr; <b>C</b>. Pick major&rarr;minor, minor&rarr;major, or both.</li>
-      <li>Both <b>major</b> and <b>minor</b> keys can show up in any style.</li>
+      <li><b>Sharp / flat / natural:</b> "E♭ major is a ____" &rarr; <b>♭ Flat major</b>; "c minor is a ____" &rarr; <b>♭ Flat minor</b>. C major / a minor are <b>Natural</b>. Pick major keys, minor keys, or both.</li>
+      <li>Every style lets you pick <b>major keys</b>, <b>minor keys</b>, or both via its sub-options.</li>
     </ul>
 
     <div class="section-title">How to answer</div>
     <div class="note-box">
-      <p style="margin:0 0 6px"><b>Key-name questions</b> (find the key, or find the relative key): tap the one key name you think is right - it turns blue - then press <b>Next</b> (or Enter).</p>
+      <p style="margin:0 0 6px"><b>Key-name questions</b> (find the key, find the relative key, or sharp/flat/natural): tap the one answer you think is right - it turns blue - then press <b>Next</b> (or Enter).</p>
       <p style="margin:12px 0 6px"><b>Key-signature questions</b> (find the sharps/flats): tap <i>every</i> sharp or flat that belongs to the key - they turn blue - then press <b>Submit</b> (or Enter). Pick the right set; the order you tap them in doesn't matter.</p>
       <p style="margin:12px 0 6px"><b>Short on time?</b> If you've picked an answer but don't press Next/Submit before the clock runs out, your selection is still recorded. Only a fully blank answer counts as missing.</p>
       <p class="hint" style="margin:0">
@@ -49,8 +50,20 @@
 
     <div class="section-title">Choose question types</div>
     <div class="type-list">
-      <label class="type-opt"><input type="checkbox" id="type1" checked><span><b>Signature -> key</b><br><small>Given the sharps/flats, find the major or minor key</small></span></label>
-      <label class="type-opt"><input type="checkbox" id="type2" checked><span><b>Key -> signature</b><br><small>Given the key, find its sharps/flats</small></span></label>
+      <div class="type-opt relative-group">
+        <label class="group-opt"><input type="checkbox" id="type1" checked><span><b>Signature -> key</b><br><small>Given the sharps/flats, find the key - tick to include both directions</small></span></label>
+        <div class="subopts">
+          <label class="subopt"><input type="checkbox" id="type1a" checked><span><b>Signature -> major key</b><br><small>Find the major key of a signature</small></span></label>
+          <label class="subopt"><input type="checkbox" id="type1b" checked><span><b>Signature -> minor key</b><br><small>Find the minor key of a signature</small></span></label>
+        </div>
+      </div>
+      <div class="type-opt relative-group">
+        <label class="group-opt"><input type="checkbox" id="type2" checked><span><b>Key -> signature</b><br><small>Given the key, find its sharps/flats - tick to include both directions</small></span></label>
+        <div class="subopts">
+          <label class="subopt"><input type="checkbox" id="type2a" checked><span><b>Major key -> signature</b><br><small>Find the sharps/flats of a major key</small></span></label>
+          <label class="subopt"><input type="checkbox" id="type2b" checked><span><b>Minor key -> signature</b><br><small>Find the sharps/flats of a minor key</small></span></label>
+        </div>
+      </div>
       <div class="type-opt relative-group">
         <label class="group-opt"><input type="checkbox" id="type3" checked><span><b>Relative keys</b><br><small>Find the relative key - tick to include both directions</small></span></label>
         <div class="subopts">
@@ -58,8 +71,15 @@
           <label class="subopt"><input type="checkbox" id="type3b" checked><span><b>minor -> major</b><br><small>Find the relative major of a minor key</small></span></label>
         </div>
       </div>
+      <div class="type-opt relative-group">
+        <label class="group-opt"><input type="checkbox" id="type4" checked><span><b>Sharp / flat / natural</b><br><small>Given a key, classify its signature - tick to include both directions</small></span></label>
+        <div class="subopts">
+          <label class="subopt"><input type="checkbox" id="type4a" checked><span><b>Major keys</b><br><small>X major &rarr; flat major (use order of flats), sharp major (use order of sharps), or natural major</small></span></label>
+          <label class="subopt"><input type="checkbox" id="type4b" checked><span><b>Minor keys</b><br><small>X minor &rarr; flat minor (use order of flats), sharp minor (use order of sharps), or natural minor</small></span></label>
+        </div>
+      </div>
     </div>
-    <p class="hint" style="margin:0 0 14px">Tick any combination. Under <b>Relative keys</b> you can pick one direction or both. Each round draws 20 questions from your selection.</p>
+    <p class="hint" style="margin:0 0 14px">Tick any combination. Every style has two sub-options - pick one direction or both. Each round draws 20 questions from your selection.</p>
     <div class="actions" style="text-align:left"><button id="startBtn">Start Quiz</button></div>
   </div>
 
@@ -158,9 +178,20 @@
   ];
   var ACC_ORDER = ['F#','C#','G#','D#','A#','E#','B#','Bb','Eb','Ab','Db','Gb','Cb','Fb'];
 
-  // ---------- build the full question pool (90 questions) ----------
+  // ---------- build the full question pool (120 questions) ----------
   var HINT_NOTE = 'Tap the one key name that fits.';
   var HINT_SIG  = 'Tap every sharp/flat that applies, then Submit. Tap "None" for no accidentals.';
+  var HINT_CAT  = 'Tap Sharp, Flat, or Natural. Order of flats: B♭ E♭ A♭ D♭ G♭ C♭ F♭ · order of sharps: F♯ C♯ G♯ D♯ A♯ E♯ B♯.';
+  var CAT_VALS = ['sharp', 'flat', 'none'];
+  function catLabel(val, noun) {
+    if (val === 'sharp') return '♯ Sharp ' + noun + ' (use order of sharps)';
+    if (val === 'flat') return '♭ Flat ' + noun + ' (use order of flats)';
+    return 'Natural (no ♯/♭)';
+  }
+  function catDisplay(val, noun) {
+    if (val === 'none') return 'natural (no sharps or flats)';
+    return (val === 'sharp' ? '♯ sharp ' : '♭ flat ') + noun;
+  }
   function buildPool() {
     var pool = [];
     SIGNATURES.forEach(function (sig) {
@@ -179,40 +210,62 @@
         promptText:  'If a key has ' + phrase + ', what is the major key?',
         expected: majN, correctDisplay: majD + ' major', hint: HINT_NOTE,
       });
-      // Style 1: signature -> minor key
+      // Style 2: signature -> minor key
       pool.push({
-        kind: 'note', multi: false, style: 1,
+        kind: 'note', multi: false, style: 2,
         promptHTML: 'If a key has <span class="given">' + phrase + '</span>, the <b>minor key</b> is <span class="blank-mark">______</span>',
         promptText:  'If a key has ' + phrase + ', what is the minor key?',
         expected: minN, correctDisplay: minD + ' minor', hint: HINT_NOTE,
       });
-      // Style 2: major key -> signature
+      // Style 3: major key -> signature
       pool.push({
-        kind: 'sig', multi: true, style: 2,
+        kind: 'sig', multi: true, style: 3,
         promptHTML: 'If it is <span class="given">' + majD + ' major</span>, its <b>key signature</b> is <span class="blank-mark">______</span>',
         promptText:  'If it is ' + majD + ' major, what sharps/flats does it have?',
         expected: sigExp, correctDisplay: sigDisp, hint: HINT_SIG,
       });
-      // Style 2: minor key -> signature
+      // Style 4: minor key -> signature
       pool.push({
-        kind: 'sig', multi: true, style: 2,
+        kind: 'sig', multi: true, style: 4,
         promptHTML: 'If it is <span class="given">' + minD + ' minor</span>, its <b>key signature</b> is <span class="blank-mark">______</span>',
         promptText:  'If it is ' + minD + ' minor, what sharps/flats does it have?',
         expected: sigExp, correctDisplay: sigDisp, hint: HINT_SIG,
       });
-      // Style 3: relative minor of a major key (major -> minor)
+      // Style 5: relative minor of a major key (major -> minor)
       pool.push({
-        kind: 'note', multi: false, style: 3,
+        kind: 'note', multi: false, style: 5,
         promptHTML: 'The <b>relative minor</b> of <span class="given">' + majD + ' major</span> is <span class="blank-mark">______</span>',
         promptText:  'What is the relative minor of ' + majD + ' major?',
         expected: minN, correctDisplay: minD + ' minor', hint: HINT_NOTE,
       });
-      // Style 4: relative major of a minor key (minor -> major)
+      // Style 6: relative major of a minor key (minor -> major)
       pool.push({
-        kind: 'note', multi: false, style: 4,
+        kind: 'note', multi: false, style: 6,
         promptHTML: 'The <b>relative major</b> of <span class="given">' + minD + ' minor</span> is <span class="blank-mark">______</span>',
         promptText:  'What is the relative major of ' + minD + ' minor?',
         expected: majN, correctDisplay: majD + ' major', hint: HINT_NOTE,
+      });
+      // Style 7: major key -> sharp / flat / natural
+      pool.push({
+        kind: 'cat', multi: false, style: 7, noun: 'major',
+        promptHTML: '<span class="given">' + majD + ' major</span> is a <span class="blank-mark">______</span>',
+        promptText:  'Is ' + majD + ' major a sharp major, a flat major, or a natural major (no sharps/flats)?',
+        expected: sig.type,
+        correctDisplay: sig.type === 'none'
+          ? 'natural major (no sharps or flats)'
+          : sig.type + ' major (' + sigPhrase(sig.count, sig.type) + ')',
+        hint: HINT_CAT,
+      });
+      // Style 8: minor key -> sharp / flat / natural
+      pool.push({
+        kind: 'cat', multi: false, style: 8, noun: 'minor',
+        promptHTML: '<span class="given">' + minD + ' minor</span> is a <span class="blank-mark">______</span>',
+        promptText:  'Is ' + minD + ' minor a sharp minor, a flat minor, or a natural minor (no sharps/flats)?',
+        expected: sig.type,
+        correctDisplay: sig.type === 'none'
+          ? 'natural minor (no sharps or flats)'
+          : sig.type + ' minor (' + sigPhrase(sig.count, sig.type) + ')',
+        hint: HINT_CAT,
       });
     });
     return pool;
@@ -220,40 +273,49 @@
   var POOL = buildPool();
 
   // ---------- start-screen wiring ----------
+  // each group: parent checkbox + two direction sub-options -> two pool styles
+  var GROUPS = [
+    { parent: 'type1', a: 'type1a', b: 'type1b', sa: 1, sb: 2 },
+    { parent: 'type2', a: 'type2a', b: 'type2b', sa: 3, sb: 4 },
+    { parent: 'type3', a: 'type3a', b: 'type3b', sa: 5, sb: 6 },
+    { parent: 'type4', a: 'type4a', b: 'type4b', sa: 7, sb: 8 },
+  ];
   function selectedStyles() {
     var s = [];
-    if (byId('type1').checked) s.push(1);
-    if (byId('type2').checked) s.push(2);
-    if (byId('type3a').checked) s.push(3);
-    if (byId('type3b').checked) s.push(4);
+    GROUPS.forEach(function (g) {
+      if (byId(g.a).checked) s.push(g.sa);
+      if (byId(g.b).checked) s.push(g.sb);
+    });
     return s;
   }
   function updateStartEnabled() {
     byId('startBtn').disabled = selectedStyles().length === 0;
   }
-  // parent "Relative keys" reflects its two direction sub-options
-  function syncRelativeParent() {
-    var a = byId('type3a').checked, b = byId('type3b').checked;
-    byId('type3').checked = a && b;
-    byId('type3').indeterminate = a !== b;
+  // a parent reflects its two direction sub-options (checked / unchecked / mixed)
+  function syncParent(g) {
+    var a = byId(g.a).checked, b = byId(g.b).checked;
+    byId(g.parent).checked = a && b;
+    byId(g.parent).indeterminate = a !== b;
   }
   byId('timeSlider').addEventListener('input', function (e) {
     byId('timeVal').textContent = e.target.value;
   });
-  byId('type3').addEventListener('change', function () {
-    var on = byId('type3').checked;
-    byId('type3a').checked = on;
-    byId('type3b').checked = on;
-    byId('type3').indeterminate = false;
-    updateStartEnabled();
-  });
-  ['type1','type2','type3a','type3b'].forEach(function (id) {
-    byId(id).addEventListener('change', function () {
-      syncRelativeParent();
+  GROUPS.forEach(function (g) {
+    byId(g.parent).addEventListener('change', function () {
+      var on = byId(g.parent).checked;
+      byId(g.a).checked = on;
+      byId(g.b).checked = on;
+      byId(g.parent).indeterminate = false;
       updateStartEnabled();
     });
+    [g.a, g.b].forEach(function (id) {
+      byId(id).addEventListener('change', function () {
+        syncParent(g);
+        updateStartEnabled();
+      });
+    });
+    syncParent(g);
   });
-  syncRelativeParent();
   updateStartEnabled();
 
   // ---------- describe a multi-select signature answer for the review ----------
@@ -276,7 +338,12 @@
     },
     renderChoices: function (q, box, ui) {
       box.innerHTML = '';
-      if (q.kind === 'note') {
+      if (q.kind === 'cat') {
+        var cr = document.createElement('div'); cr.className = 'row tf-choices';
+        CAT_VALS.forEach(function (v) { cr.appendChild(ui.choiceBtn(catLabel(v, q.noun), v, 'cat-btn')); });
+        box.appendChild(cr);
+        ui.setSubmitLabel('Next');
+      } else if (q.kind === 'note') {
         var labels = ['flats', 'naturals', 'sharps'];
         NOTE_ROWS.forEach(function (row, i) {
           var lab = document.createElement('div'); lab.className = 'row-label'; lab.textContent = labels[i];
@@ -300,7 +367,7 @@
       }
     },
     onTap: function (q, val, sel) {
-      if (q.kind === 'note') {                       // single-select
+      if (q.kind === 'note' || q.kind === 'cat') {    // single-select
         if (sel.has(val)) sel.clear();
         else { sel.clear(); sel.add(val); }
       } else {                                        // multi-select (+ None)
@@ -315,7 +382,10 @@
       }
     },
     evalAnswer: function (q, sel) {
-      if (q.kind === 'note') {
+      if (q.kind === 'cat') {
+        var cval = Array.from(sel)[0];
+        return { correct: cval === q.expected, display: catDisplay(cval, q.noun) };
+      } else if (q.kind === 'note') {
         var val = Array.from(sel)[0];
         return { correct: val === q.expected, display: disp(val) };
       } else {

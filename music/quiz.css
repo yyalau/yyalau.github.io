@@ -77,6 +77,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 /* big True / False buttons */
 .tf-choices { justify-content:center; gap: 16px; }
 .tf-choices .choice { flex: 1 1 160px; max-width: 220px; padding: 18px 16px; font-size: 1.25rem; }
+.tf-choices .choice.cat-btn { flex: 1 1 200px; max-width: 280px; font-size: 1.02rem; line-height: 1.45; }
 .submit-row { display:flex; justify-content:center; margin: 2px 0 4px; }
 .type-list { display:flex; flex-direction:column; gap:8px; margin: 6px 0 10px; }
 .type-opt { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#0f172a; cursor:pointer; }
