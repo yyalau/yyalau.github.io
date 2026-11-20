@@ -17,6 +17,13 @@ defaults:
       path: "resources/selfmanagement"
     values:
       layout: "note"
+  # Travel plans: shared note layout, but unlisted — no site links to them and
+  # the layout emits a noindex meta tag so search engines skip them.
+  - scope:
+      path: "resources/travel_plans"
+    values:
+      layout: "note"
+      noindex: true
 
 exclude:
   # --- our private (unpublished) files / folders ---
